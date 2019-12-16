@@ -1,0 +1,15 @@
+Description:  This template will deploy separate underlying stacks for VPC, EC2 instances,and RDS database
+
+Resources:
+  vpcStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/s3-code-repo-s3bucket-1wl5k4bxi7mml/c1-stack-vpc.yml"
+  rdsStack:
+    DependsOn: vpcStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/s3-code-repo-s3bucket-1wl5k4bxi7mml/c1-stack-rds.yml"
+      Parameters:
+        VpcId: !GetAtt vpcStack.Outputs.VPC
+        SubnetId: !GetAtt vpcStack.Outputs.PrivateSubnet1

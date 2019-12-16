@@ -1,0 +1,47 @@
+Description:  This template deploys ec2 instances for the project starter
+
+Parameters:
+  SubnetId:
+    Type: String
+  VpcId:
+    Type: String
+  AmiId:
+    Type: String
+
+
+Resources:
+  WebAppSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: WebAppSG
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        CidrIp: 0.0.0.0/0
+        FromPort: -1
+        ToPort: -1
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 5000
+        ToPort: 5000
+        CidrIp: 0.0.0.0/0
+      VpcId: VpcId
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: AmiId
+      InstanceType: t3.micro
+      SecurityGroupIds:
+      - !GetAtt WebAppSG.GroupId
+      SubnetId: SubnetId
+      Tags:
+      - Key: "Name"
+        Value: "Web Service Instance - C1"
+
+Outputs:
+  InstanceIP:
+    Value: !GetAtt AppInstance.PublicIP

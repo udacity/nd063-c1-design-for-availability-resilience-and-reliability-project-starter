@@ -1,0 +1,10 @@
+Description:  This template deploys an S3 bucket that will contain code to deploy the rest of the environment.
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    
+Outputs:
+  BucketName:
+    Value: !Ref 'S3Bucket'
+    Description: Name of the Amazon S3 bucket that you will upload your code to.
