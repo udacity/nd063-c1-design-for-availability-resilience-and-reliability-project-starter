@@ -1,7 +1,9 @@
 Description:  This template deploys an S3 bucket that will contain code to deploy the rest of the environment.
 
 Parameters:
-  SubnetId:
+  SubnetId1:
+    Type: String
+  SubnetId2:
     Type: String
   VpcId:
     Type: String
@@ -14,10 +16,8 @@ Resources:
       GroupName: MySQLSG
       GroupDescription: "Security group for this DB"
       SecurityGroupEgress:
-      - IpProtocol: tcp
+      - IpProtocol: -1
         CidrIp: 0.0.0.0/0
-        FromPort: -1
-        ToPort: -1
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 3306
@@ -30,7 +30,8 @@ Resources:
     Properties:
       DBSubnetGroupDescription: "Subnet group for this db"
       SubnetIds:
-      - !Ref SubnetId
+      - !Ref SubnetId1
+      - !Ref SubnetId2
 
   MYSQLDB:
     Type: AWS::RDS::DBInstance
@@ -38,16 +39,16 @@ Resources:
       AllocatedStorage: 20
       DBInstanceClass: db.t2.micro
       DBInstanceIdentifier: c1-rds-mysql
-      DBSubnetGroupName: DBSubnetGroup
-      DBName: products
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBName: product
       Engine: MySQL
       EngineVersion: 5.7.26
       MasterUsername: admin
-      MasterUserPassword: admin123
+      MasterUserPassword: jerky1999
       MultiAZ: False
       VPCSecurityGroups:
       - !Ref DBIngressSG
 
 Outputs:
-  DBEndPoint:
+  DbHost:
     Value: !GetAtt MYSQLDB.Endpoint.Address

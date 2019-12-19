@@ -12,4 +12,15 @@ Resources:
       TemplateURL: "https://s3.amazonaws.com/s3-code-repo-s3bucket-1wl5k4bxi7mml/c1-stack-rds.yml"
       Parameters:
         VpcId: !GetAtt vpcStack.Outputs.VPC
-        SubnetId: !GetAtt vpcStack.Outputs.PrivateSubnet1
+        SubnetId1: !GetAtt vpcStack.Outputs.PrivateSubnet1
+        SubnetId2: !GetAtt vpcStack.Outputs.PrivateSubnet2
+  ec2Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: rdsStack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/s3-code-repo-s3bucket-1wl5k4bxi7mml/c1-stack-ec2.yml"
+      Parameters:
+        VpcId: !GetAtt vpcStack.Outputs.VPC
+        SubnetId1: !GetAtt vpcStack.Outputs.PublicSubnet1
+        SubnetId2: !GetAtt vpcStack.Outputs.PublicSubnet2
+        DbHost: !GetAtt rdsStack.Outputs.DbHost

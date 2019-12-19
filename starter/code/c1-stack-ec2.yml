@@ -1,12 +1,23 @@
 Description:  This template deploys ec2 instances for the project starter
 
 Parameters:
-  SubnetId:
+  SubnetId1:
+    Type: String
+  SubnetId2:
     Type: String
   VpcId:
     Type: String
   AmiId:
     Type: String
+    Default: "ami-09397c199cf1dfdab"
+  DbHost:
+    Type: String
+  DbUser:
+    Type: String
+    Default: "admin"
+  DbPassword:
+    Type: String
+    Default: "jerky1999"
 
 
 Resources:
@@ -14,11 +25,10 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: WebAppSG
+      GroupDescription: "Security group for this app"
       SecurityGroupEgress:
-      - IpProtocol: tcp
+      - IpProtocol: -1
         CidrIp: 0.0.0.0/0
-        FromPort: -1
-        ToPort: -1
       SecurityGroupIngress:
       - IpProtocol: tcp
         FromPort: 22
@@ -28,20 +38,77 @@ Resources:
         FromPort: 5000
         ToPort: 5000
         CidrIp: 0.0.0.0/0
-      VpcId: VpcId
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      VpcId: !Ref VpcId
 
   AppInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: AmiId
+      ImageId: !Ref AmiId
       InstanceType: t3.micro
+      KeyName: mehdi12016
       SecurityGroupIds:
       - !GetAtt WebAppSG.GroupId
-      SubnetId: SubnetId
+      SubnetId: !Ref SubnetId1
       Tags:
       - Key: "Name"
         Value: "Web Service Instance - C1"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          echo "Environment=DB_HOST="${DbHost} | sudo tee -a /lib/systemd/system/flask.service
+          echo "Environment=DB_USER="${DbUser} | sudo tee -a /lib/systemd/system/flask.service
+          echo "Environment=DB_PASSWORD="${DbPassword} | sudo tee -a /lib/systemd/system/flask.service
+          systemctl daemon-reload
+          sleep 30
+          service flask restart
+
+# Add code for Exercise 3
+          
+  AppEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref AppInstance
+
+  AppLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: c1-web-service-alb
+      SecurityGroups:
+      - !GetAtt WebAppSG.GroupId
+      Subnets:
+        - !Ref SubnetId1
+        - !Ref SubnetId2
+
+  AppLoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppTargetGroup
+      LoadBalancerArn: !Ref AppLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /health
+      Name: AppTargetGroup
+      Port: 5000
+      VpcId: !Ref VpcId
+      Protocol: HTTP
+      Targets:
+      - Id: !Ref AppInstance
+
 
 Outputs:
   InstanceIP:
-    Value: !GetAtt AppInstance.PublicIP
+    Value: !GetAtt AppInstance.PublicDnsName
+  ApplicationURL:
+    Value: !GetAtt AppLoadBalancer.DNSName
