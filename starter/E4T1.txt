@@ -1,0 +1,7 @@
+# List the metrics that changed in your dashboard
+
+# which metrics would indicate that external customer requests are impacted?
+
+# Did the application become unavailable?  Provide an explanation for your answer.
+
+# Estimate the amount of time that the application was down.

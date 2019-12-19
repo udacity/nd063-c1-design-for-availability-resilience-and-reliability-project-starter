@@ -1,0 +1,3 @@
+# Single instance, Single AZ RDS DB environment usage cost
+
+# 2 Instances, Multi-AZ RDS DB environment usage cost:

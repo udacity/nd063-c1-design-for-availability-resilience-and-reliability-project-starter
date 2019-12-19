@@ -1,0 +1,26 @@
+# Overview of the problem statement
+
+# Executive summary of the solution
+
+# Your objective is to ensure that the same version of the application can be launched in a secondary DR environment.  Describe the method you will use to achieve this goal.
+
+
+# The business requires that a copy of the data will need to be available to use in a secondary DR environment. Describe the method you will use to achieve this goal.
+
+# Describe the design you will use to deploy your environment to a secondary region (e.g. warm standby, pilot light, active-active, etc).
+
+
+# In the event of a full outage to the primary environment, the business wants to be able to bring the secondary environment online as quickly as possible.  Identify the approach that will be used to stand up or recover the environment in the secondary region.
+
+
+# The business would like to know the anticipated availability in “9’s” for the primary environment.  Provide a calculation for this metric including assumptions made.
+
+
+# Estimate recovery time objective (RTO) - Hint - break down the estimated time for each phase of an outage, e.g: Outage detection and triage, time to bring up the new environment, time to validate and switch traffic over.
+
+
+# Estimate recovery point objective (RPO) - Worst case scenario, how old the restored data will be once the environment is restored.
+
+
+# Estimate the monthly costs of the DR environment be sure to include, usage costs for running the DR environment, changes made to the primary environment to facilitate DR (e.g. cost for enabling backups, replication, etc)
+
