@@ -28,7 +28,7 @@ Some suggested diagramming tools are draw.io or lucidchart.com. If you prefer, y
 ## Exercise 1 - Deploy Web Service Application Infrastructure
 
 **_Deliverables for Exercise 1:_**
-* _There are no deliverables for Exercise 1._
+* There are no deliverables for Exercise 1.
 
 ### Task 1:  Review Architecture Diagram
 In this task, the objective is to familiarize yourself with the starting architecture diagram. An architecture diagram has been provided which reflects the resources that will be deployed in your AWS account.
@@ -72,7 +72,8 @@ Expected example output:
 }
 ```
 
-Expected example AWS Console status: https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
+Expected example AWS Console status: 
+https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
 
 ![Expected AWS Console Status](131.png)
 
@@ -82,7 +83,10 @@ Expected example AWS Console status: https://console.aws.amazon.com/cloudformati
 
 3. Upload the code to the S3 bucket that has been created by typing this command into the console (you will replace bucket value with your bucket value):
  
-Example:  `aws s3 cp . s3://s3-code-repo-s3bucket-1wl5k4bxi7mml/ --recursive --region us-east-1`
+Example:  
+```
+aws s3 cp . s3://s3-code-repo-s3bucket-1wl5k4bxi7mml/ --recursive --region us-east-1
+```
 
 4. Deploy the stack. This will create all the resources for the application environment. In the following command, we are referencing the created S3 bucket in this command
 ```
@@ -111,8 +115,9 @@ Expected response:
 ## Task 4: Testing the Web Service
 
 In this task, the objective is to verify the application availability by running the curl command or by loading the following URL into your browser. We will use this throughout the project to verify the health and availability of the application.
-
+```
 _http://<application load balancer dns name>/health_
+```
 
 You should see the following response returned by the API call.
 
@@ -124,7 +129,7 @@ Now that you have a successfully deployed and running environment,  you need som
 
 To achieve this you will set up Route53 Health Check and CloudWatch dashboards that will display key metrics.
 
-_**Deliverables for Exercise 2:**
+**_Deliverables for Exercise 2:_**
 * **Task 2:** A screenshot called E2T2.png which shows Endpoint Health and Load Balancer & Infrastructure Metrics.
 * **Task 3:** A screenshot called E2T3.png which shows how the dashboards illustrate failures and outages.
 
@@ -134,17 +139,17 @@ In this task, the objective is to set up a Route53 health check that will simula
 1. From the AWS console - go to the [Route 53 service HealthChecks page](https://console.aws.amazon.com/route53/healthchecks/home?region=us-east-1#/).
 
 2. Create a health check for the application web service:
-..a. Name:  C1-WebService-HealthCheck
-..b. Specify Endpoint By:  Select Domain Name
-..c. Domain Name:  Copy and paste the Application URL  DNS name from the end of Exercise 1
-..d. Path: Enter the word health
-..e. Expand the Advanced Configuration Section
-..f. Select String Matching: Select Yes
-..g. Search String: Enter **Application health STATUS=UP**
-..h. Hit **Next**, and **Do not setup an Alarm**. 
-..i. Create the Health Check
+ a. Name:  C1-WebService-HealthCheck
+ b. Specify Endpoint By:  Select Domain Name
+ c. Domain Name:  Copy and paste the Application URL  DNS name from the end of Exercise 1
+ d. Path: Enter the word health
+ e. Expand the Advanced Configuration Section
+ f. Select String Matching: Select Yes
+ g. Search String: Enter **Application health STATUS=UP**
+ h. Hit **Next**, and **Do not setup an Alarm**. 
+ i. Create the Health Check
 
-See an Example below.
+See an Example below:
 
 ![HealthCheckExample](212.png)
 
@@ -163,9 +168,9 @@ You can [create dashboards here](https://console.aws.amazon.com/cloudwatch/home?
 
 1. Give your dashboard a name.
 2. Add widgets that contain the following metrics:
-..a. **Route53**: HealthCheckStatus
-..b. **Application Load Balancer**:  RequestCount and HTTP_Code_Target_2xx
-..c. **Application Load Balancer**: HealthHost Count and UnHealthyHost Count
+ a. **Route53**: HealthCheckStatus
+ b. **Application Load Balancer**:  RequestCount and HTTP_Code_Target_2xx
+ c. **Application Load Balancer**: HealthHost Count and UnHealthyHost Count
 3. Save your dashboard.
 4. Submit a screenshot of the final dashboard. Call it E2T2.png.
 
@@ -176,10 +181,10 @@ In this task, the objective is to force a failure by shutting down the applicati
 Example command:
 ```
 aws ec2 stop-instances --instance-ids i-02df0f94a929bd967
-
 ```
 2. Go back to the dashboard that you had created in Task 2.  After a few minutes you will notice changes indicating that the service is no longer up.
-3. Bring the application back up by starting the instance back up:
+3. Bring the application back up by starting the instance back up.
+
 Example command: 
 ```
 aws ec2 start-instances --instance-ids i-02df0f94a929bd967
@@ -197,7 +202,7 @@ The VPC that we deployed actually has a second subnet in a secondary availabilit
 * **Task 1:** Update the Architecture Diagram (you will update it again in Exercise 5).
 * **Task 3:** A text file called E3T3.txt with cost estimates.
 
-#### Task 1 - Update the architecture Design and Diagram
+### Task 1 - Update the architecture Design and Diagram
 In this task, the objective is to update to the initial architecture design. You must make changes to the diagram so that it will have a secondary application server node and a database server that can handle any outages occurring at the physical location where they are running (availability zone). 
 
 Make sure to show these changes in your diagram:
@@ -206,7 +211,7 @@ Make sure to show these changes in your diagram:
 * Load balancing of client requests to multiple instances
 * Multi-AZ RDS Database replication and redundancy
 
-#### Task 2 - Update Code and Deploy Redundancy Capabilities
+### Task 2 - Update Code and Deploy Redundancy Capabilities
 In this task, the objective is to deploy changes to the environment. You must make changes to the environment so that it has a secondary application server node and a database server that can handle an outages occurring at the physical location where they are running (availability zone).
 
 1. Update stack template code to add an additional EC2 instance behind the application load balancer. Add the following resource to c1-stack-ec2.yml after the AppInstance clause on line 67.
@@ -300,10 +305,13 @@ Total:
 AWS cost calculators:
 * https://calculator.aws/#/
 * https://calculator.s3.amazonaws.com/index.html
+
 EC2 Pricing:
 * https://aws.amazon.com/ec2/pricing/on-demand/
+
 RDS Pricing:
 * https://aws.amazon.com/rds/mysql/pricing/
+
 Application Load Balancer Pricing:
 * https://aws.amazon.com/elasticloadbalancing/pricing/
 
@@ -338,9 +346,9 @@ aws rds reboot-db-instance  --db-instance-identifier c1-rds-mysql
 # Did the application become unavailable?  Provide an explanation for your answer.
  
 # Estimate the amount of time that the application was down.
-
 ```
-4. Restore the environment to full capacity by starting the instance back up:
+4. Restore the environment to full capacity by starting the instance back up.
+
 Example command: 
 ```
 aws ec2 start-instances --instance-ids i-02df0f94a929bd96
@@ -375,14 +383,23 @@ In this task, the objective is to create design documentation. For your highly a
 Submit documentation to E5T1.txt with the following details:
 ```
 # Overview of the problem statement
+
 # Executive summary of the solution
+
 # Your objective is to ensure that the same version of the application can be launched in a secondary DR environment.  Describe the method you will use to achieve this goal.
+
 # The business requires that a copy of the data will need to be available to use in a secondary DR environment. Describe the method you will use to achieve this goal. 
+
 # Describe the design you will use to deploy your environment to a secondary region (e.g. warm standby, pilot light, active-active, etc). 
+
 # In the event of a full outage to the primary environment, the business wants to be able to bring the secondary environment online as quickly as possible.  Identify the approach that will be used to stand up or recover the environment in the secondary region.
+
 # The business would like to know the anticipated availability in “9’s” for the primary environment.  Provide a calculation for this metric including assumptions made.
+
 # Estimate recovery time objective (RTO) - Hint - break down the estimated time for each phase of an outage, e.g: Outage detection and triage, time to bring up the new environment, time to validate and switch traffic over.
+
 # Estimate recovery point objective (RPO) - Worst case scenario, how old the restored data will be once the environment is restored.
+
 # Estimate the monthly costs of the DR environment be sure to include, usage costs for running the DR environment, changes made to the primary environment to facilitate DR (e.g. cost for enabling backups, replication, etc)
 ```
 
