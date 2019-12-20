@@ -35,7 +35,9 @@ In this task, the objective is to familiarize yourself with the starting archite
 
 The diagram file can be found in the _starter_ directory in this repo.
 
-You may open the “AWS-WebServiceDiagram-v1-noHA.drawio” file in **draw.io** or import the diagram into **lucidchart.com** as a starting point for the architecture portion of this project. 
+You may open the “AWS-WebServiceDiagram-v1-noH
+
+drawio” file in **draw.io** or import the diagram into **lucidchart.com** as a starting point for the architecture portion of this project. 
 
 **You will be updating your architecture diagram as you change your environment.** The instructions will tell you when you need to update your diagram.
 
@@ -139,15 +141,15 @@ In this task, the objective is to set up a Route53 health check that will simula
 1. From the AWS console - go to the [Route 53 service HealthChecks page](https://console.aws.amazon.com/route53/healthchecks/home?region=us-east-1#/).
 
 2. Create a health check for the application web service:
- a. Name:  C1-WebService-HealthCheck
- b. Specify Endpoint By:  Select Domain Name
- c. Domain Name:  Copy and paste the Application URL  DNS name from the end of Exercise 1
- d. Path: Enter the word health
- e. Expand the Advanced Configuration Section
- f. Select String Matching: Select Yes
- g. Search String: Enter **Application health STATUS=UP**
- h. Hit **Next**, and **Do not setup an Alarm**. 
- i. Create the Health Check
+ * Name:  C1-WebService-HealthCheck
+ * Specify Endpoint By:  Select Domain Name
+ * Domain Name:  Copy and paste the Application URL  DNS name from the end of Exercise 1
+ * Path: Enter the word health
+ * Expand the Advanced Configuration Section
+ * Select String Matching: Select Yes
+ * Search String: Enter **Application health STATUS=UP**
+ * Hit **Next**, and **Do not setup an Alarm**. 
+ * Create the Health Check
 
 See an Example below:
 
@@ -168,9 +170,9 @@ You can [create dashboards here](https://console.aws.amazon.com/cloudwatch/home?
 
 1. Give your dashboard a name.
 2. Add widgets that contain the following metrics:
- a. **Route53**: HealthCheckStatus
- b. **Application Load Balancer**:  RequestCount and HTTP_Code_Target_2xx
- c. **Application Load Balancer**: HealthHost Count and UnHealthyHost Count
+ * **Route53**: HealthCheckStatus
+ * **Application Load Balancer**:  RequestCount and HTTP_Code_Target_2xx
+ * **Application Load Balancer**: HealthHost Count and UnHealthyHost Count
 3. Save your dashboard.
 4. Submit a screenshot of the final dashboard. Call it E2T2.png.
 
