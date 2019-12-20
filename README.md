@@ -1,64 +1,79 @@
 # Deploy a Highly Available Web Service in AWS.
 
-* In this project you will have the opportunity to design and deploy a fault tolerant and resilient web service architecture.
-* You will also monitor availability, simulate and test failure scenarios and recovery.
-* Finally,  you will have a chance to a create a reference architecture that will encompass the concepts used in the project.
+In this project, you will:
 
-## Dependancies and pre-requisites
+* Design and deploy a fault tolerant and resilient web service architecture.
+* Monitor availability, simulate and test failure scenarios and recovery.
+* Finally, you will create a reference architecture that will encompass the concepts used in the project.
+
+## Dependancies and Prerequisites
 
 ### Access to AWS account  
 Students will need to use their personal AWS accounts.  Udacity will provide a $100 credit for any usage costs. If project instructions are followed we do not anticipate usage costs to exceed this amount.
 
-### Installation of the AWS CLI and local setup of AWS API keys
+### Installation of the AWS CLI and Local Setup of AWS API keys
 Instructions and examples in this project will make use of the AWS CLI in order to automate and reduce time and complexity.
 Refer to the below links to get the AWS CLI installed and configured in your local environment.
-Installing the CLI: https://docs.aws.amazon.com/cli/latest/userguide/install-cliv1.html
-Configuring the CLI: https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 
-### Local setup of git and github repository
-You will need to clone / fork this github repo in order to work on and submit this project.
+[Installing the CL](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv1.html)
 
-### Access to a diagraming tool
-It will help if you have access to draw.io or lucidchart.com - this way you can get started and submit the project with ease.
-If you prefer, you can start from scratch and use your own tools and simply submit the diagram as an image.
+[Configuring the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
 
-## Getting Started
+### Local setup of git and GitHub Repository
+You will need to clone / fork / download this GitHub repo in order to work on and submit this project.
 
-### CloudFormation template
-To get you up and running quickly - we have provided a CloudFormation template which will deploy the following resources in AWS:
+### Access to a Diagramming Tool
+Some suggested diagramming tools are draw.io or lucidchart.com. If you prefer, you can start from scratch and use your own tools and submit the diagram as an image.
+
+## Exercise 1 - Deploy Web Service Application Infrastructure
+
+**_Deliverables for Exercise 1:**
+* There are no deliverables for Exercise 1._
+
+### Task 1:  Review Architecture Diagram
+In this task, the objective is to familiarize yourself with the starting architecture diagram. An architecture diagram has been provided which reflects the resources that will be deployed in your AWS account.
+
+The diagram file can be found in the _starter_ directory in this repo.
+
+You may open the “AWS-WebServiceDiagram-v1-noHA.drawio” file in **draw.io** or import the diagram into **lucidchart.com** as a starting point for the architecture portion of this project. 
+
+**You will be updating your architecture diagram as you change your environment.** The instructions will tell you when you need to update your diagram.
+
+**Note:** the starter environment architecture diagram is also available to view in this document as an image.
+
+### Task 2: Review CloudFormation Template
+In this task, the objective is to get you up and running quickly - we have provided a CloudFormation template which will deploy the following resources in AWS:
 
 * A VPC with 2 public subnets, one in each availability zone.
 * An instance that will be running a simple web service.
 * An RDS database that will be queried by the web service application.
 
-### Architecture Diagram
-We have also provided a simple architecture diagram which reflects the resources that will be deployed in your AWS account.  
-The diagram file can be found in the starter/diagrams directory in this repo.  
+Spend a few minutes going through the .yml files in the _starter_ folder to get a feel for how parts of the code will map to the components in the architecture diagram.
 
-You may import the diagram draw.io file into draw.io or lucidchar.com as a starting point for the architecture portion of this project, or you may use a diagraming tool of your choice.
-
-Note: the starter environment architecture diagram is also available to view in this document as an image.
-
-
-## Deployment of initial infrastructure
-Let's deploy the cloudformation stack that will create the below environment.
-
-
+## Task 3: Deployment of Initial Infrastructure
+In this task, the objective is to deploy the cloudformation stack that will create the below environment.
 
 ![base environment](/starter/diagrams/AWS-WebServiceDiagram-v1-noHA.png)
 
-This is a starting point environment which does not have redundancy or fault tolerance.  It has the basic components needed to make the application work.
+This is a starting point environment which does _not_ have redundancy or fault tolerance.  It has the basic components needed to make the application work.
 
 We will utilize the AWS CLI in this guide, however you are welcome to use the AWS console to deploy the CloudFormation template.
 
-The following documentation is useful if you would like to understand these concepts better:
-Working with CloudFormation stacks: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacks.html
-Using the AWS console to create a stack: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-create-stack.html
 
-From the root directory of the repository - execute the below command to deploy the template.
+1. From the root directory of the repository - execute the below command to deploy the template.
 ```
-aws cloudformation create-stack --stack-name webservice-app --template-body file://starter/templates/mytemplate.json
+aws cloudformation create-stack --region us-east-1 --stack-name s3-code-repo --template-body file://starter/c1-s3code.yml
 ```
+
+Expected example output:
+```
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:4363053XXXXXX:stack/s3-code-repo/70dfd370-2118-11ea-aea4-12d607a4fd1c"
+}
+```
+
+Expected example AWS Console status: https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
+
 
 ### Verify the infrastructure
 Login to the AWS CloudFormation service console and check the progress of the deployment - it will take 5-10 minutes to deploy.
