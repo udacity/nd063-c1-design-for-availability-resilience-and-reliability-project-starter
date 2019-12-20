@@ -27,7 +27,7 @@ Some suggested diagramming tools are draw.io or lucidchart.com. If you prefer, y
 
 ## Exercise 1 - Deploy Web Service Application Infrastructure
 
-**_Deliverables for Exercise 1:**
+_**Deliverables for Exercise 1:**
 * There are no deliverables for Exercise 1._
 
 ### Task 1:  Review Architecture Diagram
@@ -53,7 +53,7 @@ Spend a few minutes going through the .yml files in the _starter_ folder to get 
 ## Task 3: Deployment of Initial Infrastructure
 In this task, the objective is to deploy the cloudformation stack that will create the below environment.
 
-![base environment](/starter/diagrams/AWS-WebServiceDiagram-v1-noHA.png)
+![base environment](/starter/AWS-WebServiceDiagram-v1-noHA.png)
 
 This is a starting point environment which does _not_ have redundancy or fault tolerance.  It has the basic components needed to make the application work.
 
@@ -74,33 +74,63 @@ Expected example output:
 
 Expected example AWS Console status: https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks
 
+![Expected AWS Console Status](131.png)
 
-### Verify the infrastructure
-Login to the AWS CloudFormation service console and check the progress of the deployment - it will take 5-10 minutes to deploy.
+2. Once you see Status is CREATE_COMPLETE, determine the name of the S3 bucket by navigating to the Outputs section of the stack:
 
-Take a look at the resources that have been deployed and go to the service console (e.g. EC2 or RDS) to see what components have been deployed.
+![Outputs Section](132.png)
 
-You will need the Application Load Balancer endpoint to test the web service.
+3. Upload the code to the S3 bucket that has been created by typing this command into the console (you will replace bucket value with your bucket value):
+ 
+Example:  `aws s3 cp . s3://s3-code-repo-s3bucket-1wl5k4bxi7mml/ --recursive --region us-east-1`
 
+4. Deploy the stack. This will create all the resources for the application environment. In the following command, we are referencing the created S3 bucket in this command
+```
+aws cloudformation create-stack --region us-east-1 --stack-name applicationEnvironment --template-url https://s3.amazonaws.com/s3-code-repo-s3bucket-1wl5k4bxi7mml/c1-stack-top.yml
+```
 
-## Testing the web service
+Expected response:
+```
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:43630XXXXXX:stack/applicationEnvironment/b4efb170-2127-11ea-b56d-0a531bfc577e"
+}
+```
 
-You can verify the application availability by loading the following URL into your browser.
-We will use this through out the project to verify the health and availability of the application.
+5. Check the console for completion - allow 10-20 minutes.
 
-*provide URL here*
+![Completion](135.png)
+
+6. Take a look at the resources that have been deployed by going to the console for EC2 and RDS.  
+
+![Example for EC2](136.png)
+
+7. You will need the Application Load Balancer endpoint to test the web service.  You can get this from the Outputs section of the **applicationEnvironment-ec2** stack.
+
+![Application Load Balancer](137.png)
+
+## Task 4: Testing the Web Service
+
+In this task, the objective is to verify the application availability by running the curl command or by loading the following URL into your browser. We will use this throughout the project to verify the health and availability of the application.
+
+_http://<application load balancer dns name>/health_
 
 You should see the following response returned by the API call.
-*expected content*
 
-## Monitoring for availability and failure
+![Expected Content](14.png)
+
+## Exercise 2: Monitoring for Availability and Testing Failure
+
 Now that you have a successfully deployed and running environment,  you need some visibility into the health of your application and infrastructure.
 
-To achieve this you will setup a CloudWatch dashboard that will display key metrics.
+To achieve this you will set up Route53 Health Check and CloudWatch dashboards that will display key metrics.
 
-### Endpoint Health
-* Setup a Route53 health check that will simulate an external user making a request to our application.
-* Add the resulting metrics of this healthcheck to a dashboard in CloudWatch
+_**Deliverables for Exercise 2:**
+* **Task 2:** A screenshot called E2T2.png which shows Endpoint Health and Load Balancer & Infrastructure Metrics.
+* **Task 3:** A screenshot called E2T3.png which shows how the dashboards illustrate failures and outages.
+
+### Task 1: Monitor Endpoint Health
+In this task, the objective is to set up a Route53 health check that will simulate an external user making a request to our application.
+
 
 ### Load balancer metrics
 * Client requests will be sent from the load balancer to the application server.  
