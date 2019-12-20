@@ -27,8 +27,8 @@ Some suggested diagramming tools are draw.io or lucidchart.com. If you prefer, y
 
 ## Exercise 1 - Deploy Web Service Application Infrastructure
 
-_**Deliverables for Exercise 1:**
-* There are no deliverables for Exercise 1._
+**_Deliverables for Exercise 1:_**
+* _There are no deliverables for Exercise 1._
 
 ### Task 1:  Review Architecture Diagram
 In this task, the objective is to familiarize yourself with the starting architecture diagram. An architecture diagram has been provided which reflects the resources that will be deployed in your AWS account.
@@ -131,76 +131,232 @@ _**Deliverables for Exercise 2:**
 ### Task 1: Monitor Endpoint Health
 In this task, the objective is to set up a Route53 health check that will simulate an external user making a request to our application.
 
+1. From the AWS console - go to the [Route 53 service HealthChecks page](https://console.aws.amazon.com/route53/healthchecks/home?region=us-east-1#/).
 
-### Load balancer metrics
-* Client requests will be sent from the load balancer to the application server.  
-* Load balancer target groups will also ascertain the application server health
-* Load balancer target groups will maintain response code counts etc.
+2. Create a health check for the application web service:
+..a. Name:  C1-WebService-HealthCheck
+..b. Specify Endpoint By:  Select Domain Name
+..c. Domain Name:  Copy and paste the Application URL  DNS name from the end of Exercise 1
+..d. Path: Enter the word health
+..e. Expand the Advanced Configuration Section
+..f. Select String Matching: Select Yes
+..g. Search String: Enter **Application health STATUS=UP**
+..h. Hit **Next**, and **Do not setup an Alarm**. 
+..i. Create the Health Check
 
-Create a dashboard with key metrics discussed above from the Application Load Balancer
+See an Example below.
 
-### Infrastructure metrics
-* Explore cloudwatch metrics for the EC2 instance(s) and RDS instance
-* Create a dashboard which will display provide insight into the availability of your environment
+![HealthCheckExample](212.png)
 
 
-## Failure simulation 1 - instance failure
-Run the following commands to simulate a failure scenario where the application server instance crashes.
+### Task 2: Dashboard for Application Health
+
+In this task, the objective is to create a dashboard that will provide visibility into the application’s overall health and responsiveness including insight into:
+
+* Client requests that will be sent from the load balancer to the application server
+* Load balancer target groups and status of underlying server instances
+* Overall status of the web service endpoint
+
+Using the AWS console, create a dashboard with key metrics using CloudWatch
+
+You can [create dashboards here](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards).
+
+1. Give your dashboard a name.
+2. Add widgets that contain the following metrics:
+..a. **Route53**: HealthCheckStatus
+..b. **Application Load Balancer**:  RequestCount and HTTP_Code_Target_2xx
+..c. **Application Load Balancer**: HealthHost Count and UnHealthyHost Count
+3. Save your dashboard.
+4. Submit a screenshot of the final dashboard. Call it E2T2.png.
+
+### Task 3: Failure Simulation 1 - Instance Failure
+In this task, the objective is to force a failure by shutting down the application server instance and observe the impact on availability.
+
+1. Use the AWS CLI to shut down the application instance.  You can obtain the instance ID from the console.
+Example command:
+```
+aws ec2 stop-instances --instance-ids i-02df0f94a929bd967
 
 ```
+2. Go back to the dashboard that you had created in Task 2.  After a few minutes you will notice changes indicating that the service is no longer up.
+3. Bring the application back up by starting the instance back up:
+Example command: 
 ```
-
-Observe the dashboards that you have created above.
-What changes do we see?
-Which metrics reveal an that there is an outage?
-
-Bring the application back up with the following procedure.
+aws ec2 start-instances --instance-ids i-02df0f94a929bd967
 ```
-```
+4. Submit a screenshot of the final dashboard which shows the failure and recovery. Call it E2T3.png.
 
-
-## Update infrastructure - make it fault tolerant
+## Exercise 3: Add Redundancy and Fault Tolerance
 We initially deployed our environment with a single applications server node and a single AZ database.  
 The VPC that we deployed actually has a second subnet in a secondary availability zone.
 
-### Add redudancy and fault tolerance
-#### Task 1 - Update the architecture design
-Make changes to the initial architecture design so that it will have a secondary application server node and a database server that can handle an outages occurring at the physical location where they are running (availability zone)
+We initially deployed our environment with a single application server node and a single AZ database.
+The VPC that we deployed actually has a second subnet in a secondary availability zone.
 
-#### Task 2 - Make changes to the environment
-Make changes to the environment so that it has a secondary application server node and a database server that can handle an outages occurring at the physical location where they are running (availability zone)
+**_Deliverables for Exercise 3:_**
+* **Task 1:** Update the Architecture Diagram (you will update it again in Exercise 5).
+* **Task 3:** A text file called E3T3.txt with cost estimates.
 
-As a bonus you will benefit greatly by adding the below design constraints:
-##### Task 2 Constraint 1
-Perform all changes in the CloudFormation template and research how to update the CloudFormation stack.  Being handy with infrastructure as code is a key responsibility of a CloudArchitect.
+#### Task 1 - Update the architecture Design and Diagram
+In this task, the objective is to update to the initial architecture design. You must make changes to the diagram so that it will have a secondary application server node and a database server that can handle any outages occurring at the physical location where they are running (availability zone). 
 
-##### Task 2 Constraint 2
-Make all changes without impacting the availability and uptime of the application.  
+Make sure to show these changes in your diagram:
+* Additional subnets and availability zones
+* Additional application server instances
+* Load balancing of client requests to multiple instances
+* Multi-AZ RDS Database replication and redundancy
 
-#### Task 3
-Provide a break down of additional (before vs after) monthly costs for the changes that were made.
+#### Task 2 - Update Code and Deploy Redundancy Capabilities
+In this task, the objective is to deploy changes to the environment. You must make changes to the environment so that it has a secondary application server node and a database server that can handle an outages occurring at the physical location where they are running (availability zone).
 
-## Failure simulation 2 - Availability zone outage.
-Run the following commands to simulate a scenario where multiple components and network connectivity within a physical availability zone are undergoing failure.
+1. Update stack template code to add an additional EC2 instance behind the application load balancer. Add the following resource to c1-stack-ec2.yml after the AppInstance clause on line 67.
 
 ```
+# Add code for Exercise 3
+    AppInstance2:
+      Type: AWS::EC2::Instance
+      Properties:
+        ImageId: !Ref AmiId
+        InstanceType: t3.micro
+        SecurityGroupIds:
+        - !GetAtt WebAppSG.GroupId
+        SubnetId: !Ref SubnetId2
+        Tags:
+        - Key: "Name"
+          Value: "Web Service Instance 2 - C1"
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "Environment=DB_HOST="${DbHost} | sudo tee -a /lib/systemd/system/flask.service
+            echo "Environment=DB_USER="${DbUser} | sudo tee -a /lib/systemd/system/flask.service
+            echo "Environment=DB_PASSWORD="${DbPassword} | sudo tee -a /lib/systemd/system/flask.service
+            systemctl daemon-reload
+            sleep 30
+            service flask restart
 ```
 
-Observe the dashboards that you have created above.
-What changes do we see?
-Which metrics reveal an that there is an outage?
-Would the outage impact customers ?
-What is the impact on the application?
+2. Update the stack using the AWS CLI:
+```
+aws cloudformation update-stack --region us-east-1 --stack-name s3-code-repo --template-body file://starter/c1-stack-ec2.yml
+```
 
-Bring the application back up with the following procedure.
+Expected example output:
+```
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:4363053XXXXXX:stack/xxxx/70dfd370-2118-11ea-aea4-12d607a4fd1c"
+}
+```
+3. Use the console to verify that the stack has been updated.  See Exercise 1, Task 3 for a similar example.
+4. Update the RDS database code template to modify the RDS database to be running in Multi-AZ mode. 
+Modify the following code for the MultiAZ property in c1-stack-rds.yml:
+```
+MYSQLDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      DBInstanceClass: db.t2.micro
+      DBInstanceIdentifier: c1-rds-mysql
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBName: product
+      Engine: MySQL
+      EngineVersion: 5.7.26
+      MasterUsername: admin
+      MasterUserPassword: jerky1999
+      MultiAZ: True   # change to true for Multi-AZ
+      VPCSecurityGroups:
+      - !Ref DBIngressSG
+```
+5. Update the stack using the AWS CLI:
+```
+aws cloudformation update-stack --region us-east-1 --stack-name s3-code-repo --template-body file://starter/c1-stack-ec2.yml
+```
+
+Expected Example Output:
+```
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:4363053XXXXXX:stack/xxxx/70dfd370-2118-11ea-aea4-12d607a4fd1c"
+}
+```
+6. Use the console to verify that the stack has been updated.  See Exercise 1, Task 3 for a similar example.
+
+### Task 3 - Determine Additional Usage Costs
+In this task, the objective is to provide a break down of additional (before and after) monthly costs for the changes that were made.
+
+You will provide the cost estimates in file E3T3.txt under the following headings:
+```
+# Single instance, Single AZ RDS DB environment usage cost
+RDS:
+EC2 instances:
+EC2 Application Load Balancer:
+Total:
+# 2 Instances, Multi-AZ RDS DB environment usage cost:
+RDS:
+EC2 instances:
+EC2 Application Load Balancer:
+Total:
+```
+---
+**Tips:** Explore pricing pages and the AWS cost calculator for the services that we are using.
+AWS cost calculators:
+* https://calculator.aws/#/
+* https://calculator.s3.amazonaws.com/index.html
+EC2 Pricing:
+* https://aws.amazon.com/ec2/pricing/on-demand/
+RDS Pricing:
+* https://aws.amazon.com/rds/mysql/pricing/
+Application Load Balancer Pricing:
+* https://aws.amazon.com/elasticloadbalancing/pricing/
+
+
+## Exercise 4 - Availability zone outage.
+
+Now it’s time to see if the fault tolerance we have added will improve the availability of our environment.
+
+**_Deliverables for Exercise 4:_**
+* **Task 1:** In a text file called E4T1.txt you will write out changes you have observed after simulating an outage.
+* (Optional) **Stand Out Suggestion:** In a text file called E4SO.txt document strategies to allow for quicker detection of an issue and automated remediation. 
+
+### Task 1: Simulate an outage by running the following commands 
+In this task, the objective is to run the following commands to simulate a scenario. In this scenario, multiple components and network connectivity within a physical availability zone are undergoing failure.
+
+1. Use the AWS CLI to shut down the application instance and restart the DB (causing a failover).  You can obtain the EC2 instance ID and the RDS instance name from the console.
+Example command:
+```
+aws ec2 stop-instances --instance-ids i-02df0f94a929bd967
 ```
 ```
-### Add self healing to the mix
-The initial failure scenarios previously presented required some intervention to bring the system back to a healthy and fully functioning state.
+aws rds reboot-db-instance  --db-instance-identifier c1-rds-mysql
+```
+ 
+2. Go back to the Application Health dashboard.  Wait 5 minutes for the dashboards to refresh.
+3. Observe the changes and document the results via file E4T1.txt:
+```
+# List the metrics that changed in your dashboard
+ 
+# which metrics would indicate that external customer requests are impacted?
+ 
+# Did the application become unavailable?  Provide an explanation for your answer.
+ 
+# Estimate the amount of time that the application was down.
 
-Research and provide 2-3 strategies to allow for quicker detection of an issue and automated remediation.  
+```
+4. Restore the environment to full capacity by starting the instance back up:
+Example command: 
+```
+aws ec2 start-instances --instance-ids i-02df0f94a929bd96
+```
+### Stand Out Suggestion: Self Healing
+Research strategies to allow for quicker detection of an issue and automated remediation.
 
-## Backups and Disaster recovery
+You may document these strategies in E3SO.txt:
+```
+# Identify 1-2 changes to monitoring that would allow our dashboards to detect an outage quicker.
+
+# Describe two AWS capabilities which would allow our environment to recover from a component failure automatically (without intervention).  Hint:  One of these capabilities is included in the high availability version of our environment.
+```
+
+## Exercise 5: Backups and Disaster Recovery
+
 Thus far you have experimented with failures or loss of individual components and observed how availability is impacted.
 
 In some cases it is critical to plan for larger scale outages of AWS services or regions which would cause our entire environment be down without the ability to recover the existing environment.
@@ -209,24 +365,45 @@ In this scenario we would need to ensure that data and servers are being backed 
 
 It is your task to choose a strategy and architect the infrastructure in order to ensure that the environment can be restored to a separate region.
 
-### Document strategy
-Provide a brief outline for how you will ensure that your application can be recovered in a different region inclding:
-* the approach you will use (e.g. warm standby, pilot light, active-active, etc)
-* methods used to backup or replicate servers and data to a different region.
-* methods used to recover and bring the application up in a secondary region
-* Estimated recovery time objective (RTO)
-* Estimated recovery point objective (RPO)
-* Cost impacts
+**_Deliverables for Exercise 5:_**
+* **Task 1:** In a text file called E5T1.txt you will write out your design documentation.
+* **Task 2:** You will submit your final update of the Architecture Diagram. You will submit this as E5T2.[file extension].
+
+### Task 1: Design Documentation
+In this task, the objective is to create design documentation. For your highly available, multi-region architecture, you will provide a brief outline for how you will ensure that your application can be backed up and recovered to a different region.
+
+Submit documentation to E5T1.txt with the following details:
+```
+# Overview of the problem statement
+# Executive summary of the solution
+# Your objective is to ensure that the same version of the application can be launched in a secondary DR environment.  Describe the method you will use to achieve this goal.
+# The business requires that a copy of the data will need to be available to use in a secondary DR environment. Describe the method you will use to achieve this goal. 
+# Describe the design you will use to deploy your environment to a secondary region (e.g. warm standby, pilot light, active-active, etc). 
+# In the event of a full outage to the primary environment, the business wants to be able to bring the secondary environment online as quickly as possible.  Identify the approach that will be used to stand up or recover the environment in the secondary region.
+# The business would like to know the anticipated availability in “9’s” for the primary environment.  Provide a calculation for this metric including assumptions made.
+# Estimate recovery time objective (RTO) - Hint - break down the estimated time for each phase of an outage, e.g: Outage detection and triage, time to bring up the new environment, time to validate and switch traffic over.
+# Estimate recovery point objective (RPO) - Worst case scenario, how old the restored data will be once the environment is restored.
+# Estimate the monthly costs of the DR environment be sure to include, usage costs for running the DR environment, changes made to the primary environment to facilitate DR (e.g. cost for enabling backups, replication, etc)
+```
+
+### Stand Out Suggestion
+For each of the decision points in your design, present alternative methods or design choices and provide justification for your choice based on business requirements, best practices, or your own professional experience.  Include these additional details as a separate sub section under each heading in E5T1.txt
 
 
-### Update the Architecture Diagram
-Update the architecture to reflect your chosen strategy
+### Task 2: Update the Architecture Diagram
+In this task, the objective is to update the architecture to reflect your chosen strategy.  
 
-### Deploy to a secondary "DR" region
-*this step may be removed if the above steps end up taking too much time to complete*
+Take a screenshot or export the diagram as an image or PDF for submission. Call it E5T2.[file extension].
 
-Deploy your updated design to a secondary environment.  
-Attempt to launch the application from backups taken in the primary environment.  This would be similar to a tabletop DR validation exercise.
+The updated diagram should clearly illustrate:
+* AWS regions and availability zones
+* Infrastructure components (EC2 instances, load balancers, RDS database instances and replicas)
+* Data flow: type of traffic, where is it coming from, where is it going (include client request traffic, data replication, backups or snapshots)
+* Status of components (i.e. gray out components which are shut down or in standby mode)
+
+## Required Screenshots and File Uploads:
+
+![final](final.png)
 
 ## Built With
 
@@ -235,7 +412,6 @@ Attempt to launch the application from backups taken in the primary environment.
 * Python flask web service
 * MySQL database (RDS)
 * draw.io architecture design diagram
-
 
 ## License
 
