@@ -201,7 +201,7 @@ We initially deployed our environment with a single application server node and 
 The VPC that we deployed actually has a second subnet in a secondary availability zone.
 
 **_Deliverables for Exercise 3:_**
-* **Task 1:** Update the Architecture Diagram (you will update it again in Exercise 5).
+* **Task 1:** Update the Architecture Diagram (you will update it again in Exercise 5). Call this version E3T1.[file extension].
 * **Task 3:** A text file called E3T3.txt with cost estimates.
 
 ### Task 1 - Update the architecture Design and Diagram
@@ -212,6 +212,8 @@ Make sure to show these changes in your diagram:
 * Additional application server instances
 * Load balancing of client requests to multiple instances
 * Multi-AZ RDS Database replication and redundancy
+
+Submit a version of this diagram. Call it E3T1.[file extension].
 
 ### Task 2 - Update Code and Deploy Redundancy Capabilities
 In this task, the objective is to deploy changes to the environment. You must make changes to the environment so that it has a secondary application server node and a database server that can handle an outages occurring at the physical location where they are running (availability zone).
